@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-import argparse, os, yaml, feedparser, urllib.parse
+import argparse, os, yaml, feedparser, urllib.parse, urllib
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--rsnl", help="Newsletter")
@@ -10,11 +10,21 @@ args = parser.parse_args()
 
 print(args.rsnl, args.rsc, args.rss)
 
+def get_youtube_rss(inpu):
+    if '/channel/' in inpu:
+        return "https://www.youtube.com/feeds/videos.xml?channel_id="+ inpu.split("/channel/")[1].split('/')[0].split('?')[0]
+    if '/user/' in inpu:
+        return "https://www.youtube.com/feeds/videos.xml?user=" + inpu.split("/user/")[1].split('/')[0].split('?')[0]
+
 def retrieve_input(inpu):
+    print('input', inpu)
     if 'rsc' in inpu:
         raise Exception('not yet implemented')
-    if inpu.startswith('https://youtube.com/'):
-        raise Exception('not yet implemented')
+    if inpu.startswith('https://youtube.com/') or inpu.startswith('https://www.youtube.com/'):
+        print('YOUTUBE')
+        rss = get_youtube_rss(inpu)
+        retrieve_rss(rss)
+        return
     if inpu.startswith('googlenews'):
         (country,search) = inpu.split(':')
         (tmp, lang, country) = country.split('-')
@@ -27,19 +37,17 @@ def retrieve_input(inpu):
     retrieve_rss(inpu)
 
 def retrieve_rss(rss):
-    #feed = feedparser.parse('https://news.google.com/rss/search?q=neolithic')
     feed = feedparser.parse(rss)
-    # https://news.google.com/rss?hl=<LANGUAGE_CODE>&gl=<COUNTRY_CODE>&ceid=<COUNTRY_CODE>:<LANGUAGE_CODE>
 
     print()
     for post in feed.entries:
-        print(post.title)
+        print('----', post.title)
+        print(post.link)
 
 
 def parse_rsc_file(rsc_file):
-    if rsc_file.startswith('http'):
-        raise Exception('not yet implemented')
-    rsc = yaml.load(open(rsc_file).read(), yaml.SafeLoader)
+    content = urllib.request.urlopen(rsc_file).read() if rsc_file.startswith('http') else open(rsc_file).read()
+    rsc = yaml.load( content, yaml.SafeLoader)
     return rsc
 
 
@@ -74,3 +82,5 @@ if args.rss != None:
 if args.input != None:
     print('---------input', args.input)
     retrieve_input(args.input)
+if args.rsc != None:
+    print(parse_rsc_file(args.rsc))
