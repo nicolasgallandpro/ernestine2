@@ -5,7 +5,7 @@ refresh_time: "* * * *"
 formatting:
   - "title": true
   - "author": true
-input:
+feeds:
     - 'le monde pixels': https://www.lemonde.fr/pixels/rss_full.xml
     - 'le monde planete': https://www.lemonde.fr/planete/rss_full.xml
     - 'chaine youtube x': https://www.youtube.com/channel/UCU0FhLr6fr7U9GOn6OiQHpQ

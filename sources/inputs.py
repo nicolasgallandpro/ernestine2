@@ -24,24 +24,22 @@ def get_youtube_rss(inpu):
     if '/user/' in inpu:
         return "https://www.youtube.com/feeds/videos.xml?user=" + inpu.split("/user/")[1].split('/')[0].split('?')[0]
 
-def retrieve_input(inpu):
+def retrieve_input(inpu, add_keys=False):
     """
     Retrieve the input. Can be a youtube channel url, a rss url, or a google news input formated as : "googlenews-fr-fr: blablabla"
     """
     print('input', inpu)
     if inpu.startswith('https://youtube.com/') or inpu.startswith('https://www.youtube.com/'):
         info('YOUTUBE')
-        rss = get_youtube_rss(inpu)
-        return retrieve_rss(rss)
+        inpu = get_youtube_rss(inpu)
     if inpu.startswith('googlenews'):
         (country,search) = inpu.split(':')
         (tmp, lang, country) = ('', 'en', 'en') if country=='googlenews' else country.split('-')
         params = {'hl':lang, 'gl':country, 'ceid':country+':'+lang, 'q':search.strip()}
         urllib.parse.urlencode(params)
-        request = f'https://news.google.com/rss/search?' + urllib.parse.urlencode(params)  #hl={lang}&gl={country}&ceid={country}:{lang}&search?q={search_prep}'
-        info(f'google news {lang}, {country}, {request}')
-        return retrieve_rss(request)
-    return retrieve_rss(inpu)
+        inpu = f'https://news.google.com/rss/search?' + urllib.parse.urlencode(params)  #hl={lang}&gl={country}&ceid={country}:{lang}&search?q={search_prep}'
+        info(f'google news {lang}, {country}, {inpu}')
+    return (inpu,retrieve_rss(inpu)) if add_keys else retrieve_rss(inpu)  
 
 def retrieve_inputs(inputs):
     """
@@ -50,11 +48,12 @@ def retrieve_inputs(inputs):
     with concurrent.futures.ThreadPoolExecutor() as executor:
         futures = []
         for inp in inputs:
-            futures.append(executor.submit(retrieve_input, inp))
-        results = []
+            futures.append(executor.submit(retrieve_input, inp, True))
+        results = {}
         for future in concurrent.futures.as_completed(futures):
             try:
-                results.append(future.result())
+                inpu, res = future.result()
+                results[inpu] = res
             except requests.ConnectTimeout:
                 info("ConnectTimeout.")      
         return results     
@@ -79,5 +78,19 @@ if __name__ == "__main__":
             "http://radiofrance-podcast.net/podcast09/rss_14312.xml",\
              "https://www.lemonde.fr/pixels/rss_full.xml",\
              "https://rss.nytimes.com/services/xml/rss/nyt/Science.xml"       ]
-    outs = retrieve_inputs() 
+    outs = retrieve_inputs(ins) 
+
+    for k in outs.keys():
+        print('----------', k)
+        o = outs[k]
+        if o:
+            pprint(o.entries[0].keys())
+            if 'source' in o.entries[0]:
+                print('source', o.entries[0].source)
+            if 'author' in o.entries[0]:
+                print('author', o.entries[0].author)
+            if 'published' in o.entries[0]:
+                print('pusblished', o.entries[0].published)
+        else:
+            print('?')
     
