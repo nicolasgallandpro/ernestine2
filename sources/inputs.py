@@ -7,7 +7,7 @@ def retrieve_rss(rss):
     """
     Request of the rss file 
     """
-    response = requests.get(url=rss, timeout=5, allow_redirects=True)
+    response = requests.get(url=rss, timeout=45, allow_redirects=True)
     feed = feedparser.parse(response.content)
     info(f"retrieve rss: {rss}")
     for post in feed.entries:
@@ -41,7 +41,7 @@ def retrieve_input(inpu):
         request = f'https://news.google.com/rss/search?' + urllib.parse.urlencode(params)  #hl={lang}&gl={country}&ceid={country}:{lang}&search?q={search_prep}'
         info(f'google news {lang}, {country}, {request}')
         return retrieve_rss(request)
-    retrieve_rss(inpu)
+    return retrieve_rss(inpu)
 
 def retrieve_inputs(inputs):
     """
@@ -65,14 +65,19 @@ def retrieve_inputs(inputs):
 #---------------------------------------------------------------------------------------
 #---------------------------------------------------------------------------------------
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.DEBUG)
+    from pprint import pprint
+    logging.basicConfig(level=logging.INFO)
     #retrieve_input("googlenews-fr-fr: paleoanthropologie")
     #print()
     #retrieve_input("https://www.youtube.com/channel/UC3E2DhYIqnoc6H3WXwTVnlA")
     #print() 
     #retrieve_input("http://radiofrance-podcast.net/podcast09/rss_14312.xml") 
-
+    #pprint(out)
     print("-----------------------") 
-    retrieve_inputs(["googlenews-fr-fr: paleoanthropologie", \
+    ins = ["googlenews-fr-fr: paleoanthropologie", \
         "https://www.youtube.com/channel/UC3E2DhYIqnoc6H3WXwTVnlA",\
-            "http://radiofrance-podcast.net/podcast09/rss_14312.xml"]) 
+            "http://radiofrance-podcast.net/podcast09/rss_14312.xml",\
+             "https://www.lemonde.fr/pixels/rss_full.xml",\
+             "https://rss.nytimes.com/services/xml/rss/nyt/Science.xml"       ]
+    outs = retrieve_inputs() 
+    
