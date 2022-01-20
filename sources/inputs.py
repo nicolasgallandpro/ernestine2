@@ -12,13 +12,13 @@ def retrieve_rss(rss):
     
     # case cache
     if redis.exists(rss):
-        info('%% from cache: '+rss)
+        debug('%% from cache: '+rss)
         return feedparser.parse(redis.get(rss))
     
     # case request
     response = requests.get(url=rss, timeout=45, allow_redirects=True)
     feed = feedparser.parse(response.content)
-    info(f"retrieve rss: {rss}")
+    debug(f"retrieve rss: {rss}")
     for post in feed.entries:
         debug( post.title)
         debug(post.link)

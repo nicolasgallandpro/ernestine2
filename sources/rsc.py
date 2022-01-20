@@ -1,11 +1,17 @@
 #!/usr/bin/env python
-import feedparser, urllib.parse, urllib, logging
+import feedparser, urllib.parse, urllib, logging, json, datetime
 import yaml
 from logging import debug, info, warning, error
 from pprint import pprint
 from inputs import retrieve_input, retrieve_inputs
+from datetime import date
+import dateutil.parser
 
-KEYWORDS = ['keep_only', 'limit_posts']
+KEYWORDS = {
+    'keep_filter':'keep_only', 
+    'limit_posts':'limit_posts',
+    'max_age':'max_age_minutes'
+}
 
 def parse_rsc_file(rsc_file):
     """
@@ -15,7 +21,7 @@ def parse_rsc_file(rsc_file):
     """
     content = urllib.request.urlopen(rsc_file).read() if rsc_file.startswith('http') else open(rsc_file).read()
     rsc = yaml.load( content, yaml.SafeLoader)
-    pprint(rsc)
+    #pprint(rsc)
 
     # name
     if 'name' not in rsc:
@@ -24,7 +30,7 @@ def parse_rsc_file(rsc_file):
         for i, inp in enumerate(category['feeds']):
             possibles_names = []
             for entry_key in inp.keys():
-                if entry_key not in KEYWORDS:
+                if entry_key not in KEYWORDS.values():
                     possibles_names.append(entry_key)
             if len(possibles_names) == 0:
                 raise Exception(f'The input number {i} has no name')
@@ -58,35 +64,70 @@ def get_raw_posts(rsc_conf):
     raw = retrieve_inputs(inputs)
     return raw
 
-def prepare_curation_data_without_thumbnails(rsc_conf, raw_results, time_filtered=False):
+
+def format_entry(entry, feed):
+    """
+    Helper : Create an object with unified informations (title, source, ...)
+    """
+    link = entry['link'] 
+    url = link if type(link)==type('') else link['href']  
+    return {
+        'source': entry['source']['title'] if 'source' in entry else feed['name'] if type(link)==type('') else link['name'], 
+        'url': url,
+        'title': entry['title'],
+        'summary': entry['summary'],
+        'id': entry['id'],
+        'published': entry['published'],
+        'author': entry['author'] if 'author' in entry else None,
+        'image': entry['media_content'] if 'media_content' in entry and \
+            ('jpg' in entry['media_content'] or 'jpeg' in entry['media_content']) else None
+    }
+def entry_keep_filter(feed, f):
+    """
+    Helper : eval keep filter. 
+    Args : feed, f (=formated entry)
+    """
+    prep = lambda t:t.lower() if t!=None else None
+    source, url, title, summary, texte, author = (prep(f['source']), prep(f['url']), prep(f['title']), \
+                    prep(f['summary']), prep(f['title'] + ' '+ f['summary']), prep(f['author']))
+    if KEYWORDS['keep_filter'] not in feed :
+        debug('no filter')
+        return True;
+    if eval((feed[KEYWORDS['keep_filter']]).lower()):
+        debug('filter OK')
+        return True
+    else:
+        debug('filter KO !!')
+        return False
+
+def max_age_filter(rsc_conf, entry):
+    """
+    Helper : eval max age filter
+    """
+    if KEYWORDS['max_age'] not in rsc_conf : 
+        return True
+    age_s = (datetime.datetime.utcnow().replace(tzinfo=None) - dateutil.parser.parse(entry['published']).replace(tzinfo=None)).total_seconds()
+    return (age_s/60) < rsc_conf[KEYWORDS['max_age']]
+
+#-------------------- interprete rsc
+def prepare_curation_data_without_thumbnails(rsc_conf, raw_results):
     """
     Makes a well formated object with categories, sources, ordered posts
     """
-    pprint(rsc_conf)
-    if time_filtered:
-        raise NotImplementedError()
     #if pas google news : ajouter la source 
     for category in rsc_conf['categories']:
         category['entries'] = []
-
         for feed in category['feeds']:
             data = raw_results[feed['inpuut']]
-
-            def format_entry(entry):
-                return {
-                    'source': entry['source'] if 'source' in entry else feed['name'],
-                    'link': entry['link'],
-                    'title': entry['title'],
-                    'summary': entry['summary'],
-                    'id': entry['id'],
-                    'published': entry['published'],
-                    'author': entry['author'] if 'author' in entry else None,
-                    'image': entry['media_content'] if 'media_content' in entry and \
-                        ('jpg' in entry['media_content'] or 'jpeg' in entry['media_content']) else None
-                }
             for entry in data['entries']:
-                category['entries'].append(format_entry(entry))
-            
+                formated_entry = format_entry(entry, feed)
+                debug(entry['title'])
+                #applying filters
+                if entry_keep_filter(feed, formated_entry) and max_age_filter(rsc_conf, entry): 
+                    category['entries'].append(formated_entry)
+        #newer first:
+        (category['entries']).sort(key=lambda x: dateutil.parser.parse(x['published']), reverse=True)
+                
     return rsc_conf
 
 
@@ -95,10 +136,9 @@ def print_formated_posts(formated_posts):
     """
     for category in formated_posts['categories']:
         print('---------------', category['name'])
-        print(category.keys())
         for post in category['entries']:
             print(post['published'], post['source'], '---', post['title'])
-            print(post['link'])
+            print(post['url'])
 
 
 #---------------------------------------------------------------------------------------
@@ -112,9 +152,9 @@ if __name__ == "__main__":
     #pprint(rsc_conf)
 
     raw = get_raw_posts(rsc_conf)
-    print(raw.keys())
+    #print(raw.keys())
 
-    formated_posts = prepare_curation_data_without_thumbnails(rsc_conf, raw, time_filtered=False) 
+    formated_posts = prepare_curation_data_without_thumbnails(rsc_conf, raw) 
     print_formated_posts(formated_posts) 
     #pprint(formated_posts)
     

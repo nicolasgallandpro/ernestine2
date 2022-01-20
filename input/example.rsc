@@ -1,7 +1,7 @@
 version: 0.1
 name: science
 description: toute l'actu de la science, en fr et en
-refresh_time: "* * * *"
+max_age_minutes: 1440  #1440 min = 24h
 formatting:
   - "title": true
   - "author": true
@@ -23,4 +23,4 @@ categories:
   - name: 'tribunes'
     feeds:
       - 'google news tribunes' : 'googlenews-fr-fr: tribune'
-        'keep_only': "'Tribune de Genève' not in source and 'Tribune de lyon' not in source and 'latribune' not in domain and 'herault-tribune' not in domain"
+        'keep_only': "'tribune' not in source"
