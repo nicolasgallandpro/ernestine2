@@ -23,4 +23,4 @@ categories:
   - name: 'tribunes'
     feeds:
       - 'google news tribunes' : 'googlenews-fr-fr: tribune'
-        keep_only: "'Tribune de Genève' not in source and 'Tribune de lyon' not in source and 'latribune' not in domain and 'herault-tribune' not in domain"
+        'keep_only': "'Tribune de Genève' not in source and 'Tribune de lyon' not in source and 'latribune' not in domain and 'herault-tribune' not in domain"

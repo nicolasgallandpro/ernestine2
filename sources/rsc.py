@@ -62,20 +62,43 @@ def prepare_curation_data_without_thumbnails(rsc_conf, raw_results, time_filtere
     """
     Makes a well formated object with categories, sources, ordered posts
     """
+    pprint(rsc_conf)
     if time_filtered:
         raise NotImplementedError()
     #if pas google news : ajouter la source 
-    print()
+    for category in rsc_conf['categories']:
+        category['entries'] = []
+
+        for feed in category['feeds']:
+            data = raw_results[feed['inpuut']]
+
+            def format_entry(entry):
+                return {
+                    'source': entry['source'] if 'source' in entry else feed['name'],
+                    'link': entry['link'],
+                    'title': entry['title'],
+                    'summary': entry['summary'],
+                    'id': entry['id'],
+                    'published': entry['published'],
+                    'author': entry['author'] if 'author' in entry else None,
+                    'image': entry['media_content'] if 'media_content' in entry and \
+                        ('jpg' in entry['media_content'] or 'jpeg' in entry['media_content']) else None
+                }
+            for entry in data['entries']:
+                category['entries'].append(format_entry(entry))
+            
+    return rsc_conf
 
 
 def print_formated_posts(formated_posts):
     """
     """
-    for category in formated_posts.categories:
-        print('---------------', category.name)
-        for post in category.posts:
-            print(post.published, post.title)
-            print(post.url)
+    for category in formated_posts['categories']:
+        print('---------------', category['name'])
+        print(category.keys())
+        for post in category['entries']:
+            print(post['published'], post['source'], '---', post['title'])
+            print(post['link'])
 
 
 #---------------------------------------------------------------------------------------
@@ -86,11 +109,12 @@ if __name__ == "__main__":
     from pprint import pprint
     
     rsc_conf = parse_rsc_file("/Users/nicolas/Documents/dev/ernestine/ernestine2/input/example.rsc")
-    pprint(rsc_conf)
+    #pprint(rsc_conf)
 
     raw = get_raw_posts(rsc_conf)
     print(raw.keys())
 
-    formated_posts = prepare_curation_data_without_thumbnails(rsc_conf, raw_results, time_filtered=False) 
+    formated_posts = prepare_curation_data_without_thumbnails(rsc_conf, raw, time_filtered=False) 
     print_formated_posts(formated_posts) 
+    #pprint(formated_posts)
     

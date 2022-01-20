@@ -1,18 +1,28 @@
 #!/usr/bin/env python
 import feedparser, urllib.parse, urllib, logging, requests
 from logging import debug, info, warning, error
-import requests, concurrent.futures
+import requests, concurrent.futures, redis as _redis
+
+redis = _redis.Redis()
 
 def retrieve_rss(rss):
     """
-    Request of the rss file 
+    Request of the rss file for cache (redis) or from the web
     """
+    
+    # case cache
+    if redis.exists(rss):
+        info('%% from cache: '+rss)
+        return feedparser.parse(redis.get(rss))
+    
+    # case request
     response = requests.get(url=rss, timeout=45, allow_redirects=True)
     feed = feedparser.parse(response.content)
     info(f"retrieve rss: {rss}")
     for post in feed.entries:
         debug( post.title)
         debug(post.link)
+    redis.set(rss, response.content, ex=600)
     return feed
 
 def get_youtube_rss(inpu):
@@ -28,6 +38,7 @@ def retrieve_input(inpu, add_keys=False):
     """
     Retrieve the input. Can be a youtube channel url, a rss url, or a google news input formated as : "googlenews-fr-fr: blablabla"
     """
+    original_inpu = inpu
     print('input', inpu)
     if inpu.startswith('https://youtube.com/') or inpu.startswith('https://www.youtube.com/'):
         info('YOUTUBE')
@@ -39,7 +50,7 @@ def retrieve_input(inpu, add_keys=False):
         urllib.parse.urlencode(params)
         inpu = f'https://news.google.com/rss/search?' + urllib.parse.urlencode(params)  #hl={lang}&gl={country}&ceid={country}:{lang}&search?q={search_prep}'
         info(f'google news {lang}, {country}, {inpu}')
-    return (inpu,retrieve_rss(inpu)) if add_keys else retrieve_rss(inpu)  
+    return (original_inpu,retrieve_rss(inpu)) if add_keys else retrieve_rss(inpu)  
 
 def retrieve_inputs(inputs):
     """

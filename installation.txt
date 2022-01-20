@@ -1,3 +1,4 @@
 pip3 install opengraph
-pip3 install pyyaml pytest feedparser requests
+pip3 install pyyaml pytest feedparser requests redis
 
+#docker run --name redis -d -e ALLOW_EMPTY_PASSWORD=yes -p 6379:6379 bitnami/redis:latest  
