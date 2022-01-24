@@ -13,3 +13,4 @@ categories:
     feeds:
       - 'google news tribunes' : 'googlenews-fr-fr: tribune'
         'keep_only': "'tribune' not in source"
+

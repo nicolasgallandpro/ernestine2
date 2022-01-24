@@ -6,7 +6,7 @@ formatting:
   - "title": true
   - "author": true
 categories:
-  - name: 'paleoanthropologie'
+  - name: 'science'
     feeds:
       - 'le monde pixels': https://www.lemonde.fr/pixels/rss_full.xml
       - 'le monde planete': https://www.lemonde.fr/planete/rss_full.xml
@@ -14,6 +14,8 @@ categories:
       - 'chaine youtube y': https://www.youtube.com/channel/UC3E2DhYIqnoc6H3WXwTVnlA
       - 'stat news': https://www.statnews.com/feed/
       - 'nyt science': https://rss.nytimes.com/services/xml/rss/nyt/Science.xml
+  - name: 'paleoanthropologie'
+    feeds:
       - 'podcast x': http://radiofrance-podcast.net/podcast09/rss_14312.xml
       - 'podcast y': http://radiofrance-podcast.net/podcast09/rss_20902.xml   #commentaire 
       - 'google news paleoanthropologie fr': 'googlenews-fr-fr: paléoanthropologie'
