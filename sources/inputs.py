@@ -16,7 +16,7 @@ def retrieve_rss(rss):
         return feedparser.parse(redis.get(rss))
     
     # case request
-    response = requests.get(url=rss, timeout=45, allow_redirects=True)
+    response = requests.get(url=rss, timeout=5, allow_redirects=True)
     feed = feedparser.parse(response.content)
     debug(f"retrieve rss: {rss}")
     for post in feed.entries:
@@ -33,6 +33,10 @@ def get_youtube_rss(inpu):
         return "https://www.youtube.com/feeds/videos.xml?channel_id="+ inpu.split("/channel/")[1].split('/')[0].split('?')[0]
     if '/user/' in inpu:
         return "https://www.youtube.com/feeds/videos.xml?user=" + inpu.split("/user/")[1].split('/')[0].split('?')[0]
+    if '.xml' in inpu:
+        return inpu
+    if 'playlist?list=' in inpu:
+        return 'https://www.youtube.com/feeds/videos.xml?playlist_id=' + inpu.split('list=')[1]
 
 def retrieve_input(inpu, add_keys=False):
     """
@@ -50,7 +54,8 @@ def retrieve_input(inpu, add_keys=False):
         urllib.parse.urlencode(params)
         inpu = f'https://news.google.com/rss/search?' + urllib.parse.urlencode(params)  #hl={lang}&gl={country}&ceid={country}:{lang}&search?q={search_prep}'
         info(f'google news {lang}, {country}, {inpu}')
-    return (original_inpu,retrieve_rss(inpu)) if add_keys else retrieve_rss(inpu)  
+    res = retrieve_rss(inpu)
+    return (original_inpu,res) if add_keys else res  
 
 def retrieve_inputs(inputs):
     """
@@ -67,6 +72,8 @@ def retrieve_inputs(inputs):
                 results[inpu] = res
             except requests.ConnectTimeout:
                 info("ConnectTimeout.")      
+            except :
+                error('!!!!!!!!!!!!! erreur sur ')
         return results     
 
 

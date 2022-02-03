@@ -6,11 +6,7 @@ formatting:
   - "title": true
   - "author": true
 categories:
-  - name: 'biologie'
+  - name: 'test'
     feeds:
-      - 'blog le monde realites biomedicales': https://www.lemonde.fr/blog/realitesbiomedicales/feed/
-  - name: 'tribunes'
-    feeds:
-      - 'google news tribunes' : 'googlenews-fr-fr: tribune'
-        'keep_only': "'tribune' not in source"
+      -  'blast' : 'https://api.blast-info.fr/rss.xml'
 
