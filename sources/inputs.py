@@ -2,6 +2,14 @@
 import feedparser, urllib.parse, urllib, logging, requests
 from logging import debug, info, warning, error
 import requests, concurrent.futures, redis as _redis
+from typing import List, Tuple, Dict
+import dateutil.parser, datetime
+
+
+"""
+Helpers that retrieve raw inputs of rss/sitemaps
+"""
+
 
 redis = _redis.Redis()
 
@@ -22,10 +30,10 @@ def retrieve_rss(rss):
     for post in feed.entries:
         debug( post.title)
         debug(post.link)
-    redis.set(rss, response.content, ex=600)
+    redis.set(rss, response.content, ex=600) # cache de 10 minutes du résultat de la requete
     return feed
 
-def get_youtube_rss(inpu):
+def get_youtube_rss(inpu: str):
     """
     Get the rss url from a youtube channel
     """
@@ -75,6 +83,60 @@ def retrieve_inputs(inputs):
             except :
                 error('!!!!!!!!!!!!! erreur sur ')
         return results     
+
+
+
+class Entry:
+    """
+    A post entry of rss or sitemap
+    """
+    source: str; url: str; title: str; summary: str = None; id: str = None; 
+    published:str = None; published_key: str = None; author: str= None; image: str = None
+    def __init__(self, raw_entry: Dict, feed_name: str):
+        """
+        Helper : Create an object with unified informations (title, source, ...) for all types of feeds (atom, rss, youtube, google news, podcasts ...)
+        """
+        link = raw_entry['link'] 
+        in_entry = lambda e:e if e in raw_entry.keys() else False
+        published_key = in_entry('pubDate') or in_entry('published') or in_entry('updated') or None
+        if raw_entry.get(published_key) == None :
+            info(f"!!! une entrée de {feed_name} n'a pas de publish date. {str(','.join(raw_entry.keys()))}")
+        
+        self.source = raw_entry['source']['title'] if 'source' in raw_entry else feed_name if type(link)==str else link['name']
+        self.url = link if type(link)==str else link['href']  
+        self.title = raw_entry['title']
+        self.summary = raw_entry.get('summary') or ''
+        self.id = raw_entry.get('id')
+        self.published = raw_entry.get(published_key)
+        self.published_key = published_key
+        self.author = raw_entry['author'] if 'author' in raw_entry else None
+        self.image = raw_entry['media_content'] if 'media_content' in raw_entry and \
+            ('jpg' in raw_entry['media_content'] or 'jpeg' in raw_entry['media_content']) else None
+
+
+    def keep_filter(self, keep_filter: str) -> bool:
+        """
+        Helper : eval keep filter. 
+        Args : feed, formated entry
+        """
+        prep = lambda t:t.lower() if t!=None else None
+        source, url, title, summary, text, author = (prep(self.source), prep(self.url), prep(self.title), \
+                        prep(self.summary), prep(self.title + ' '+ self.summary), prep(self.author))
+        return eval(keep_filter.lower()) 
+
+
+    def max_age_filter(self, max_age_minutes: int) -> bool:
+        """
+        Helper : eval max age filter
+        """
+        
+        if self.published == None:
+            debug('published not in entry, so entry is filtered')
+            return False 
+        age_s = (datetime.datetime.utcnow().replace(tzinfo=None) - dateutil.parser.parse(self.published).replace(tzinfo=None)).total_seconds()
+        debug(f'time filter. keep ? {(age_s/60) < max_age_minutes} age minutes : {age_s/60} max {max_age_minutes}')
+        return (age_s/60) < max_age_minutes
+
 
 
 
