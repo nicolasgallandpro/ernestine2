@@ -3,7 +3,7 @@ name: medias_independants
 description: 'médias indépendants'
 max_age_minutes: 1440  #1440 min = 24h
 categories:
-  - name: 'medias_indep'
+  - name: 'medias_indeps'
     feeds:
       - 'off investigation' : 'https://www.off-investigation.fr/feed/'
       - 'basta' : 'https://www.bastamag.net/spip.php?page=backend'
@@ -14,6 +14,7 @@ categories:
       - 'là bas' : 'https://la-bas.org/spip.php?page=backend'
       - 'le vent se lève' : 'https://lvsl.fr/feed/'
       - 'the conversation fr' : 'https://theconversation.com/fr/articles.atom'
+      - 'the conversation ca-fr' : 'https://theconversation.com/ca-fr/home-page/articles.atom'
       - 'acrimed' : 'https://www.acrimed.org/spip.php?page=backend'
       - 'institut rousseau' : 'https://www.institut-rousseau.fr/feed/'
       - 'fakir' : 'https://www.fakirpresse.info/spip.php?page=backend'
@@ -37,3 +38,6 @@ categories:
       - 'guiti news' : 'https://guitinews.fr/feed/'
       - 'backseat' : 'https://www.youtube.com/channel/UC2ijB3_Fg2pIW1g6FeIiYKA'
       - 'mr mondialisation' : 'https://mrmondialisation.org/feed/'
+      - 'up magazine' : 'https://up-magazine.info/feed/'
+      - 'predicta lab' : 'https://predictalab.medium.com/feed'
+      - 'Tom Nicholas' : 'https://www.youtube.com/playlist?list=PLIVcDWpMT7KfTCsp2It3EVmMwG2C7CfPf'

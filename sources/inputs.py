@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-import feedparser, urllib.parse, urllib, logging, requests
+import feedparser, urllib.parse, urllib, logging, requests, traceback
 from logging import debug, info, warning, error
 import requests, concurrent.futures, redis as _redis
 from typing import List, Tuple, Dict
@@ -69,19 +69,25 @@ def retrieve_inputs(inputs):
     """
     Multithreaded version of retrieve_input
     """
+    #
+    redis.exists('check that redis is launched')
+    #
     with concurrent.futures.ThreadPoolExecutor() as executor:
-        futures = []
-        for inp in inputs:
-            futures.append(executor.submit(retrieve_input, inp, True))
+        #futures = []
+        #for inp in inputs:
+        #    futures.append(executor.submit(retrieve_input, inp, True))
+        future_to_url = {executor.submit(retrieve_input, inp, True): inp for inp in inputs}
         results = {}
-        for future in concurrent.futures.as_completed(futures):
+        #for future in concurrent.futures.as_completed(futures):
+        for future in concurrent.futures.as_completed(future_to_url):
+            inp = future_to_url[future]
             try:
                 inpu, res = future.result()
                 results[inpu] = res
             except requests.ConnectTimeout:
-                info("ConnectTimeout.")      
+                error(str(inp) + ": ConnectTimeout.")      
             except :
-                error('!!!!!!!!!!!!! erreur sur ')
+                error(str(inp) + ":Unexpected Exception "+ traceback.format_exc())
         return results     
 
 
@@ -91,7 +97,7 @@ class Entry:
     A post entry of rss or sitemap
     """
     source: str; url: str; title: str; summary: str = None; id: str = None; 
-    published:str = None; published_key: str = None; author: str= None; image: str = None
+    published = None; s_spublished: str = None; published_key: str = None; author: str= None; image: str = None
     def __init__(self, raw_entry: Dict, feed_name: str):
         """
         Helper : Create an object with unified informations (title, source, ...) for all types of feeds (atom, rss, youtube, google news, podcasts ...)
@@ -107,7 +113,8 @@ class Entry:
         self.title = raw_entry['title']
         self.summary = raw_entry.get('summary') or ''
         self.id = raw_entry.get('id')
-        self.published = raw_entry.get(published_key)
+        self.published = dateutil.parser.parse(raw_entry.get(published_key))
+        self.s_published = raw_entry.get(published_key)
         self.published_key = published_key
         self.author = raw_entry['author'] if 'author' in raw_entry else None
         self.image = raw_entry['media_content'] if 'media_content' in raw_entry and \
@@ -133,9 +140,12 @@ class Entry:
         if self.published == None:
             debug('published not in entry, so entry is filtered')
             return False 
-        age_s = (datetime.datetime.utcnow().replace(tzinfo=None) - dateutil.parser.parse(self.published).replace(tzinfo=None)).total_seconds()
+        age_s = (datetime.datetime.utcnow().replace(tzinfo=None) - self.published.replace(tzinfo=None)).total_seconds()
         debug(f'time filter. keep ? {(age_s/60) < max_age_minutes} age minutes : {age_s/60} max {max_age_minutes}')
         return (age_s/60) < max_age_minutes
+
+
+
 
 
 

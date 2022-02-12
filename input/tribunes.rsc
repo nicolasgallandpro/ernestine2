@@ -8,3 +8,4 @@ categories:
       - 'google news tribunes' : 'googlenews-fr-fr: tribune'
         'keep_only': "'tribune' not in source and 'stade' not in title"
       - 'tribunes du Monde' : 'https://www.lemonde.fr/idees-tribunes/rss_full.xml'
+      - 'thikerview' : 'https://www.youtube.com/channel/UCQgWpmt02UtJkyO32HGUASQ'

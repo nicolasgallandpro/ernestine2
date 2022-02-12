@@ -15,17 +15,16 @@ KEYWORDS = {
     'max_age':'max_age_minutes'
 }
 
-
 class Category:
     name: str = None
     feeds: str = None
     import_feeds_from: str = None # file:category  Example:  example.rsc:science
     keep_only:str = None  #python like
-    entries = None # will be filled when feed data is retrieved. Will be an array of 'formated_entries'
+    entries = None # !! will be filled when feed data is retrieved. Will be an array of 'formated_entries'
     def __init__(self, name, import_feeds_from=None, keep_only=None):
         self.name, self.import_feeds_from, self.keep_only = name, import_feeds_from, keep_only
     def __str__(self):
-        print('-', self.name, self.import_feeds_from, self.keep_only)
+        #print('-', self.name, self.import_feeds_from, self.keep_only)
         return str([str(feed) for feed in self.feeds])
 
 class Feed:
@@ -35,11 +34,10 @@ class Feed:
     def __init__(self, name: str, inpuut: str, keep_only=None):
         self.name, self.inpuut, self.keep_only = name, inpuut, keep_only
     def __str__(self):
-        print('-','-',self.name, self.inpuut, self.keep_only)
+        #print('-','-',self.name, self.inpuut, self.keep_only)
         return ''
 
-class Category_Data:
-    name: None
+
 
 
 
@@ -51,10 +49,11 @@ class Parsed_rsc:
     categories: List[Category] = None
     description: str = None
     max_age_minutes: int = None
+    last_update = None #!! will be filled when feed data is retrieved
 
     #------------------------------------        
     def __str__(self):
-        print(self.name, self.description, self.max_age_minutes)
+        #print(self.name, self.description, self.max_age_minutes)
         return str([str(c) for c in self.categories])
     
     def __init__(self, rsc_file, recur=0):
@@ -74,7 +73,8 @@ class Parsed_rsc:
             origin = category_conf['import_feeds_from']
             imported_rsc = Parsed_rsc(origin.split(':')[0] if ':' in origin else origin)
             imported_category_name = origin.split(':')[1] if ':' in origin else category_conf['name']
-            print(imported_category_name)
+            info('Category imported:' + imported_category_name)
+            #print(imported_category_name)
             imported_category = (list(filter(lambda c:c.name==imported_category_name, imported_rsc.categories)))[0] 
             #todo erreur propre si le nom de catégory n'existe pas 
             return imported_category.feeds
@@ -85,9 +85,11 @@ class Parsed_rsc:
                 if entry_key not in KEYWORDS.values():
                     possibles_names.append(entry_key)
             if len(possibles_names) == 0:
-                raise Exception(f'The input number {i} has no name')
+                error(f'The input number {i} has no name')
+                continue
             if len(possibles_names)>1:
-                raise Exception(f'Category: {category_conf["name"]} : The input number {i} has {len(possibles_names)} possible names : {",".join(possibles_names)}')
+                error(f'Category: {category_conf["name"]} : The input number {i} has {len(possibles_names)} possible names : {",".join(possibles_names)}')
+                continue
             feed_name = possibles_names[0]
             feeds.append(Feed(feed_name, feed[feed_name], feed.get('keep_only')))
         return feeds 
@@ -122,23 +124,35 @@ def prepare_curation_data_without_thumbnails(rsc_conf: Parsed_rsc, raw_results):
                 info(f"le feed {feed.name} n'a pas donné de réponse")
                 continue
             data = raw_results[feed.inpuut]
+            stats = {'entries':0, 'no_error':0, 'passed_feed_keep_filter':0, 'passed_category_keep_filter': 0, 'passed_max_age_filter':0}
             for raw_entry in data.entries:
+                stats['entries'] +=1
                 try:
                     entry = Entry(raw_entry, feed.name)
+                except:
+                    error(f'Error while parsing an entry of {feed.name}')
+                    continue
+                try:
                     debug(raw_entry['title'])
                     #applying filters
-                    feed_keep_filter_passed = True if feed.keep_only == None else entry.keep_filter(feed.keep_only)
-                    category_keep_filter_passed = True if category.keep_only == None else entry.keep_filter(category.keep_only)
-                    max_age_filter_passed = True if rsc_conf.max_age_minutes == None else entry.max_age_filter(rsc_conf.max_age_minutes)
-                    if feed_keep_filter_passed and category_keep_filter_passed and max_age_filter_passed: 
+                    passed_feed_keep_filter = True if feed.keep_only == None else entry.keep_filter(feed.keep_only)
+                    passed_category_keep_filter = True if category.keep_only == None else entry.keep_filter(category.keep_only)
+                    passed_max_age_filter = True if rsc_conf.max_age_minutes == None else entry.max_age_filter(rsc_conf.max_age_minutes)
+                    if passed_feed_keep_filter and passed_category_keep_filter and passed_max_age_filter: 
                         category.entries.append(entry)
                     #print(feed.name, formated_entry['title'], max_age_filter(rsc_conf, entry), formated_entry['published_key'], formated_entry['published'])
-                    print(feed.name, entry.published_key)
+                    stats['no_error'] +=1
+                    stats['passed_feed_keep_filter'] += 1 if passed_feed_keep_filter else 0
+                    stats['passed_category_keep_filter'] += 1 if passed_category_keep_filter else 0
+                    stats['passed_max_age_filter'] += 1 if passed_max_age_filter else 0
+                    #print(feed.name, entry.published_key)
                 except:
-                    info(f'error with the an entry of {feed.name}')
+                    error(f'Error while filtering an entry of {feed.name}')
                     continue
+            info(f"{feed.name} stats: {stats['entries']} entries, {stats['no_error']} no_error, {stats['passed_feed_keep_filter']} passed_feed_keep_filter, " +\
+                  f"{stats['passed_category_keep_filter']}: passed_category_keep_filter, {stats['passed_max_age_filter']}: passed_max_age_filter")
         #newer first:
-        (category.entries).sort(key=lambda x: dateutil.parser.parse(x.published), reverse=True)
+        (category.entries).sort(key=lambda x: x.published, reverse=True)
                 
     return rsc_conf
 
@@ -159,11 +173,12 @@ def print_formated_posts(formated_posts):
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
 
-    #TODO : !!!!!!!!!!!!!! problème : pas toujours le meme format de date. à vérifier. parser les dates dans Entry
     #TODO :  gérer le cas sitemap
-    #TODO :  ajouter des stats
+    #TODO : aller chercher les images
+    #TODO : astro build
 
-    p = Parsed_rsc("/Users/nicolas/Documents/dev/ernestine/ernestine2/input/medias_indeps.rsc")
+    #p = Parsed_rsc("/Users/nicolas/Documents/dev/ernestine/ernestine2/input/indeps_fact_tribunes.rsc")
+    p = Parsed_rsc("/Users/nicolas/Documents/dev/ernestine/ernestine2/input/indeps_fact_tribunes.rsc")
     str(p)
     raw = get_raw_posts(p)
     #rsc_conf = parse_rsc_file("/Users/nicolas/Documents/dev/ernestine/ernestine2/input/medias_indeps.rsc")
