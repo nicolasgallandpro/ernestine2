@@ -173,12 +173,15 @@ def print_formated_posts(formated_posts):
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
 
-    #TODO :  gérer le cas sitemap
     #TODO : aller chercher les images
+    #TODO : template simple à base de python
     #TODO : astro build
+    #TODO : gérer le cas sitemap
 
     #p = Parsed_rsc("/Users/nicolas/Documents/dev/ernestine/ernestine2/input/indeps_fact_tribunes.rsc")
-    p = Parsed_rsc("/Users/nicolas/Documents/dev/ernestine/ernestine2/input/indeps_fact_tribunes.rsc")
+    #p = Parsed_rsc("/Users/nicolas/Documents/dev/ernestine/ernestine2/input/indeps_fact_tribunes.rsc")
+    p = Parsed_rsc("/Users/nicolas/Documents/dev/ernestine/ernestine-data/science.rsc")
+    str(p)
     str(p)
     raw = get_raw_posts(p)
     #rsc_conf = parse_rsc_file("/Users/nicolas/Documents/dev/ernestine/ernestine2/input/medias_indeps.rsc")
