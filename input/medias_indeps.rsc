@@ -29,7 +29,6 @@ categories:
       - 'mediapart' : 'https://www.mediapart.fr/articles/feed'
       - 'street press' : 'https://backend.streetpress.com/rss.xml'
       - 'blast' : 'https://api.blast-info.fr/rss.xml'
-      - 'le media' : 'https://api.lemediatv.fr/rss.xml'
       - 'arrêt sur image' : 'https://api.arretsurimages.net/api/public/rss/all-content'
       - 'mediacites' : 'https://www.mediacites.fr/feed/'
       - 'bondy blog' : 'https://www.bondyblog.fr/feed/'

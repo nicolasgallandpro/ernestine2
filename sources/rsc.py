@@ -165,6 +165,8 @@ def print_formated_posts(formated_posts):
         for post in category.entries:
             print(post.published, post.source, '---', post.title)
             print(post.url)
+            print(post.summary)
+            print()
 
 
 #---------------------------------------------------------------------------------------
@@ -179,8 +181,8 @@ if __name__ == "__main__":
     #TODO : gérer le cas sitemap
 
     #p = Parsed_rsc("/Users/nicolas/Documents/dev/ernestine/ernestine2/input/indeps_fact_tribunes.rsc")
-    #p = Parsed_rsc("/Users/nicolas/Documents/dev/ernestine/ernestine2/input/indeps_fact_tribunes.rsc")
-    p = Parsed_rsc("/Users/nicolas/Documents/dev/ernestine/ernestine-data/science.rsc")
+    p = Parsed_rsc("/Users/nicolas/Documents/dev/ernestine/ernestine2/input/indeps_fact_tribunes.rsc")
+    #p = Parsed_rsc("/Users/nicolas/Documents/dev/ernestine/ernestine-data/science.rsc")
     str(p)
     str(p)
     raw = get_raw_posts(p)
