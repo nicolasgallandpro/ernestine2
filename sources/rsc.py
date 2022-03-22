@@ -165,7 +165,7 @@ def print_formated_posts(formated_posts):
         for post in category.entries:
             print(post.published, post.source, '---', post.title)
             print(post.url)
-            print(post.summary)
+            #print(post.summary)
             print()
 
 
