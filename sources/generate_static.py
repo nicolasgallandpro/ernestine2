@@ -22,16 +22,22 @@ head_template = f"""
 <p>{medias}</p>
 <p>{independants}</p>
 <p>------------------------------------</p>
-<p>Les articles, vidéos, et podcasts publiés dans les médias indépendants ces dernières 24 heures </p>
+<p>Les articles, vidéos, et podcasts publiés par les médias indépendants ces dernières 24 heures </p>
 <p>Certifié 100% sans influence de milliardaire et lobbys industriels</p>
 <p>------------------------------------</p>
 <br/>
 """
 
+footer_template = f"""
+<br/>
+<br/>
+<br/>
+<p>Fait un citoyen lambda """
+
 categoty_template = """<p>------------------ {category} ------------------</p>"""
 
 entry_template = """
-<p><span  style="color:#FAA2AE">{published}</span> -- <span style="color:gray;">{source}</span> -- <a style="color:black" href="{url}">{title}<a/> </p>
+<p><span  style="color:#FAA2AE">{published}</span> -- <span style="color:gray;">{source}</span> -- <a style="color:black; text-decoration-color: #aaaaaa;" href="{url}">{title}<a/> </p>
 <p/>
 """
 
