@@ -104,7 +104,7 @@ class Entry:
         """
         link = raw_entry['link'] 
         in_entry = lambda e:e if e in raw_entry.keys() else False
-        published_key = in_entry('pubDate') or in_entry('published') or in_entry('updated') or None
+        published_key = in_entry('pubDate') or in_entry('published') or in_entry('updated') or in_entry('dc:date') or in_entry('dc:date') or None
         if raw_entry.get(published_key) == None :
             info(f"!!! une entrée de {feed_name} n'a pas de publish date. {str(','.join(raw_entry.keys()))}")
         

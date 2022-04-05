@@ -125,10 +125,14 @@ def prepare_curation_data_without_thumbnails(rsc_conf: Parsed_rsc, raw_results):
                 continue
             data = raw_results[feed.inpuut]
             stats = {'entries':0, 'no_error':0, 'passed_feed_keep_filter':0, 'passed_category_keep_filter': 0, 'passed_max_age_filter':0}
+
             for raw_entry in data.entries:
                 stats['entries'] +=1
                 try:
                     entry = Entry(raw_entry, feed.name)
+                    if 'fakir' in feed.name:
+                        print('FAKIR !!!!!')
+                        print(entry.title, entry.published, entry.max_age_filter(rsc_conf.max_age_minutes))
                 except:
                     error(f'Error while parsing an entry of {feed.name}')
                     continue
@@ -181,7 +185,8 @@ if __name__ == "__main__":
     #TODO : gérer le cas sitemap
 
     #p = Parsed_rsc("/Users/nicolas/Documents/dev/ernestine/ernestine2/input/indeps_fact_tribunes.rsc")
-    p = Parsed_rsc("/Users/nicolas/Documents/dev/ernestine/ernestine2/input/indeps_fact_tribunes.rsc")
+    p = Parsed_rsc("/Users/nicolas/Documents/dev/ernestine/ernestine2/input/medias_indeps.rsc")
+    
     #p = Parsed_rsc("/Users/nicolas/Documents/dev/ernestine/ernestine-data/science.rsc")
     str(p)
     str(p)
