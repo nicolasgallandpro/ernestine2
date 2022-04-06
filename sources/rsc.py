@@ -93,6 +93,17 @@ class Parsed_rsc:
             feed_name = possibles_names[0]
             feeds.append(Feed(feed_name, feed[feed_name], feed.get('keep_only')))
         return feeds 
+    
+    def to_json(self):
+        import copy
+        formated_posts = copy.deepcopy(self)
+        d = formated_posts.__dict__
+        d['categories'] = [cat.__dict__ for cat in d['categories']]
+        for cat in d['categories']:
+            cat['feeds'] = [f.__dict__ for f in cat['feeds']]
+            if 'entries' in cat.keys():
+                cat['entries'] = [f.__dict__ for f in cat['entries']] 
+        return d
 
 
 
@@ -167,17 +178,6 @@ def print_formated_posts(formated_posts):
             #print(post.summary)
             print()
 
-def formated_posts_to_json(formated_posts):
-    """Prend l'objet final qui contient la conf des flux + les posts, et le format en json
-    """
-    import copy
-    formated_posts = copy.deepcopy(formated_posts)
-    d = formated_posts.__dict__
-    d['categories'] = [cat.__dict__ for cat in d['categories']]
-    for cat in d['categories']:
-        cat['feeds'] = [f.__dict__ for f in cat['feeds']]
-        cat['entries'] = [f.__dict__ for f in cat['entries']] 
-    return d
 
 #---------------------------------------------------------------------------------------
 #---------------------------------------------------------------------------------------
