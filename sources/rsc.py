@@ -93,7 +93,7 @@ class Parsed_rsc:
             feed_name = possibles_names[0]
             feeds.append(Feed(feed_name, feed[feed_name], feed.get('keep_only')))
         return feeds 
-   
+
 
 
 def get_raw_posts(rsc_conf: Parsed_rsc):
@@ -105,8 +105,6 @@ def get_raw_posts(rsc_conf: Parsed_rsc):
         inputs += [ feed.inpuut for feed in category.feeds]
     raw = retrieve_inputs(inputs)
     return raw
-
-
 
 
 
@@ -130,9 +128,6 @@ def prepare_curation_data_without_thumbnails(rsc_conf: Parsed_rsc, raw_results):
                 stats['entries'] +=1
                 try:
                     entry = Entry(raw_entry, feed.name)
-                    if 'fakir' in feed.name:
-                        print('FAKIR !!!!!')
-                        print(entry.title, entry.published, entry.max_age_filter(rsc_conf.max_age_minutes))
                 except:
                     error(f'Error while parsing an entry of {feed.name}')
                     continue
@@ -172,6 +167,17 @@ def print_formated_posts(formated_posts):
             #print(post.summary)
             print()
 
+def formated_posts_to_json(formated_posts):
+    """Prend l'objet final qui contient la conf des flux + les posts, et le format en json
+    """
+    import copy
+    formated_posts = copy.deepcopy(formated_posts)
+    d = formated_posts.__dict__
+    d['categories'] = [cat.__dict__ for cat in d['categories']]
+    for cat in d['categories']:
+        cat['feeds'] = [f.__dict__ for f in cat['feeds']]
+        cat['entries'] = [f.__dict__ for f in cat['entries']] 
+    return d
 
 #---------------------------------------------------------------------------------------
 #---------------------------------------------------------------------------------------
@@ -185,7 +191,7 @@ if __name__ == "__main__":
     #TODO : gérer le cas sitemap
 
     #p = Parsed_rsc("/Users/nicolas/Documents/dev/ernestine/ernestine2/input/indeps_fact_tribunes.rsc")
-    p = Parsed_rsc("/Users/nicolas/Documents/dev/ernestine/ernestine2/input/medias_indeps.rsc")
+    p = Parsed_rsc("https://raw.githubusercontent.com/nicolasgallandpro/ernestine-data/main/medias_indeps.rsc")
     
     #p = Parsed_rsc("/Users/nicolas/Documents/dev/ernestine/ernestine-data/science.rsc")
     str(p)

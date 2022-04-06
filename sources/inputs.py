@@ -4,6 +4,7 @@ from logging import debug, info, warning, error
 import requests, concurrent.futures, redis as _redis
 from typing import List, Tuple, Dict
 import dateutil.parser, datetime
+from bs4 import BeautifulSoup
 
 
 """
@@ -12,6 +13,26 @@ Helpers that retrieve raw inputs of rss/sitemaps
 
 
 redis = _redis.Redis(host='redis')
+
+def html_to_text(html):
+    """ extrait le text du html"""
+    if type(html)!=str:
+        return ''
+    soup = BeautifulSoup(html, features="html.parser")
+    # kill all script and style elements
+    for script in soup(["script", "style"]):
+        script.extract()    # rip it out
+    # get text
+    text = soup.get_text()
+    # break into lines and remove leading and trailing space on each
+    lines = (line.strip() for line in text.splitlines())
+    # break multi-headlines into a line each
+    chunks = (phrase.strip() for line in lines for phrase in line.split("  "))
+    # drop blank lines
+    text = '\n'.join(chunk for chunk in chunks if chunk)
+    return text
+
+
 
 def retrieve_rss(rss):
     """
@@ -111,7 +132,8 @@ class Entry:
         self.source = raw_entry['source']['title'] if 'source' in raw_entry else feed_name if type(link)==str else link['name']
         self.url = link if type(link)==str else link['href']  
         self.title = raw_entry['title']
-        self.summary = raw_entry.get('summary') or ''
+        self.summary = html_to_text(raw_entry.get('summary') or '')
+        self.summary = self.summary if len(self.summary)<300 else self.summary[:300] + '[...]'
         self.id = raw_entry.get('id')
         self.published = dateutil.parser.parse(raw_entry.get(published_key))
         self.s_published = raw_entry.get(published_key)
