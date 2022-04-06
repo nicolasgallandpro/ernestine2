@@ -40,3 +40,4 @@ categories:
       - 'up magazine' : 'https://up-magazine.info/feed/'
       - 'predicta lab' : 'https://predictalab.medium.com/feed'
       - 'Tom Nicholas' : 'https://www.youtube.com/playlist?list=PLIVcDWpMT7KfTCsp2It3EVmMwG2C7CfPf'
+      - 'one zero' : 'https://onezero.medium.com/feed'
