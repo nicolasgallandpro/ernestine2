@@ -60,27 +60,28 @@ icon_book = '<ion-icon name="book-outline"></ion-icon>'
 video_sources = "osons causer,blast,thinkerview,arrêt sur image".split(',')
 audio_sources = ['in extenso']
 
-def create_page(rsc, file, show_categories=True):
-  p = Parsed_rsc(rsc)
-  raw = get_raw_posts(p)
-  formated_posts = prepare_curation_data_without_thumbnails(p, raw) 
-  out = ""
-  for category in formated_posts.categories:
-    if show_categories:
-        out += categoty_template.format(category=category.name)
-    for post in category.entries:
-      icon = icon_video if post.source in video_sources else icon_audio if post.source.lower() in audio_sources else icon_book
-      out += entry_template.format(title=post.title, published=str(post.published).split('+')[0],\
-        source=post.source, url=post.url, icon=icon)
-  out = head_template + out
-  out = page_template.format(content=out)
-  out = out + footer_template
+def create_page(rsc_filled, file, show_categories=True):
+    p = rsc_filled
+    out = ""
+    for category in p.categories:
+        if show_categories:
+            out += categoty_template.format(category=category.name)
+        for post in category.entries:
+            icon = icon_video if post.source in video_sources else icon_audio if post.source.lower() in audio_sources else icon_book
+            out += entry_template.format(title=post.title, published=str(post.published).split('+')[0],\
+            source=post.source, url=post.url, icon=icon)
+        out = head_template + out
+        out = page_template.format(content=out)
+        out = out + footer_template
 
-  #print(out)
-  f = open(file,'w')
-  f.write(out)
-  f.close()
-  return out
+    #print(out)
+    f = open(file,'w')
+    f.write(out)
+    f.close()
+    
+    return out
+
+
 if __name__ == "__main__":
-  logging.basicConfig(level=logging.INFO)
-  create_page("/Users/nicolas/Documents/dev/ernestine/ernestine2/input/medias_indeps.rsc", "/Users/nicolas/Documents/dev/ernestine/static_v1/output/index.html", show_categories=False)
+    logging.basicConfig(level=logging.INFO)
+    create_page("/Users/nicolas/Documents/dev/ernestine/ernestine2/input/medias_indeps.rsc", "/Users/nicolas/Documents/dev/ernestine/static_v1/output/index.html", show_categories=False)
