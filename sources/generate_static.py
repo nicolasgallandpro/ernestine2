@@ -83,8 +83,9 @@ icon_book = '<ion-icon name="book-outline"></ion-icon>'
 video_sources = "osons causer,blast,thinkerview,arrêt sur image".split(',')
 audio_sources = ['in extenso']
 
-def create_page(rsc_filled, basedir, file, title, description, json):
-    content = page_template.replace('___TITLE___',title).replace('___DESCRIPTION___',description)\
+def create_page(rsc_filled, basedir, file, title, description, json, rsc):
+    description_plus_source = description + f' - <a href="{rsc}" style="border-bottom: 1px solid #7dd3fc">sources</a>'
+    content = page_template.replace('___TITLE___',title).replace('___DESCRIPTION___',description_plus_source)\
                 .replace('___JSON___',json)
     #print(out)
     
