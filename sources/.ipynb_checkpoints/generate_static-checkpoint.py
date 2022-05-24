@@ -4,53 +4,76 @@ from rsc import *
 page_template = """
 <!DOCTYPE html>
 <html lang="fr">
-  <head>
-    <meta charset="utf-8">
-    <title>Swartz News</title>
-    <link rel="stylesheet" href="style.css">
-    <script src="script.js"></script>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta property="og:title" content="Swartz News" />
-    <meta property="og:description" content="L'info de 35 Médias indépendants centralisée en 1 endroit. Mediapart - Blast - Thinkerview - Osons Causer - Off Investigation..." />
-    <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
-    <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
-  </head>
-  <body style="font-family:monospace; font-size: 1.1em">
-   {content}
-  </body>
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/alpinejs" defer></script>
+    <title>Swartz.news</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400|Playfair+Display|Playfair+Display+SC|Roboto:300,400&display=swap" rel="stylesheet">
+</head>
+<body>
+    <style>
+    p {
+      font-family: 'Open Sans', sans-serif;
+     font-weight: 300;
+    }
+    h2 {
+     font-family: 'Playfair Display', sans-serif;
+     font-weight: 600;
+    }
+    .playfair{ font-family: 'Playfair Display SC'}
+    .roboto { font-family: 'Roboto';font-weight: 300;}
+        
+    </style>
+    <div class="container mx-auto px-6 md:px-40">
+
+        <div class="playfair md:text-6xl text-5xl mb-4 pt-6">
+            ___TITLE___
+        </div>
+        
+        <p class="mb-6">___DESCRIPTION___</p>
+       
+        <main class="py-6" x-data="{categories : []}"
+        x-init="fetch('https://swartz.news/___JSON___')
+            .then(response=> {
+                if (!response.ok) alert(`Something went wrong: ${response.status} - ${response.statusText}`)
+                return response.json()
+            })
+            .then(data => categories = data.categories)">
+
+            <template x-for="entry in categories[0].entries">
+                <div class="mb-12">
+                    <div class="flex flex-col md:flex-row w-full lg:w-12/12">
+                        <div class="md:mr-4 mb-2 md:mb-0 md:w-4/12 ">
+                            <a class="bg-gray-100" :href="entry.url">
+                                <img style="width:640;height:360;" class="object-cover h-56 w-96 rounded-lg mb-3 hover:opacity-70 transition duration-300 ease-in-out" alt="" :src="entry.image">
+                            </a>
+                        </div>
+                        <div class="flex-1">
+                            <a :href="entry.url" >
+                                <h2 class="text-xl mb-1 playfair" x-text="entry.title"></h2>
+                            </a>
+                            <div class="p-1 px-3 mr-1 mb-1 inline-block text-xs font-mono rounded text-blue-800 hover:bg-blue-200 hover:text-blue-800 transition duration-300 ease-in-out">
+                                 <span x-text="entry.published.split('T')[0]"></span> - <span x-text="entry.source"></span>  
+                            </div>
+                            <p class="text-sm text-gray-600 mb-4 roboto" x-text="entry.summary"></p>
+                            
+                        </div>
+                    </div>
+                </div>
+            </template>
+        
+        </main>
+
+    </div>
+
+
+</body>
 </html>
-"""
-
-medias = text2art("Swartz").replace(' ','&nbsp;').replace('\n','<br/>\n')
-independants = text2art("News").replace(' ','&nbsp;').replace('\n','<br/>\n')
-head_template = f"""
-<div style="font-size: 0.9em;">
-<p>{medias}</p>
-</div>
-<div style="font-size: 0.9em;">
-<p>{independants}</p>
-</div>
-<div style="font-size: 0.8em;">
-<p>------------------------------------</p>
-<p>Centralise l'info de <a style="color:black" href="https://github.com/nicolasgallandpro/ernestine-data/blob/main/medias_indeps.rsc">35 médias indépendants</a>. Articles, vidéos, et podcasts</p>
-<p>Mediapart - Blast - Thinkerview - Off Investigations - Osons Causer - The Conversation ...</p>
-<p>24h d'info brute, sans influence de milliardaires et sans algo. Actualisé toutes les heures </p>
-<p>------------------------------------</p>
-<br/>
-</div>
-"""
-
-footer_template = f"""
-<br/>
-<br/>
-<br/>
-<a href="https://github.com/nicolasgallandpro/ernestine-data/blob/main/medias_indeps.rsc"><p style="color:black">Liste complète des sources utilisés</p></a>"""
-
-categoty_template = """<p>------------------ {category} ------------------</p>"""
-
-entry_template = """
-<p><span  style="color:#FAA2AE">{published}</span> {icon} <a style="color:black; text-decoration-color: #aaaaaa;" href="{url}">{title}<a/> -- <span style="color:#999999;">{source}</span></p>
-<p/>
 """
 
 icon_audio = '<ion-icon name="mic-outline"></ion-icon>'
@@ -60,26 +83,20 @@ icon_book = '<ion-icon name="book-outline"></ion-icon>'
 video_sources = "osons causer,blast,thinkerview,arrêt sur image".split(',')
 audio_sources = ['in extenso']
 
-def create_page(rsc_filled, file, show_categories=True):
-    p = rsc_filled
-    out = ""
-    for category in p.categories:
-        if show_categories:
-            out += categoty_template.format(category=category.name)
-        for post in category.entries:
-            icon = icon_video if post.source in video_sources else icon_audio if post.source.lower() in audio_sources else icon_book
-            out += entry_template.format(title=post.title, published=str(post.published).split('+')[0],\
-            source=post.source, url=post.url, icon=icon)
-        out = head_template + out
-        out = page_template.format(content=out)
-        out = out + footer_template
-
+def create_page(rsc_filled, basedir, file, title, description, json):
+    content = page_template.replace('___TITLE___',title).replace('___DESCRIPTION___',description)\
+                .replace('___JSON___',json)
     #print(out)
-    f = open(file,'w')
-    f.write(out)
+    
+    #html
+    f = open(basedir+file,'w')
+    f.write(content)
     f.close()
     
-    return out
+    #json
+    f = open(basedir+json, "w")
+    f.write(rsc_filled.to_json())
+    f.close()
 
 
 if __name__ == "__main__":

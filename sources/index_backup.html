@@ -48,7 +48,7 @@
                 <div class="mb-12">
                     <div class="flex flex-col md:flex-row w-full lg:w-10/12">
                         <div class="md:mr-4 mb-2 md:mb-0 md:w-4/12 ">
-                            <a class="bg-gray-100" href="https://jekyll-atlantic.netlify.app/blog/2018-12-29-writing-with-markdown/">
+                            <a class="bg-gray-100" :href="entry.url">
                                 <img width="640" height="360" class="rounded mb-3 hover:opacity-70 transition duration-300 ease-in-out" alt="Writing With Markdown" :src="entry.image">
                             </a>
                         </div>
@@ -57,7 +57,7 @@
                                 <div class="text-sm font-medium text-gray-700" x-text="entry.published">
                                 </div>
                             </div>
-                            <a href="https://jekyll-atlantic.netlify.app//blog/2018-12-29-writing-with-markdown/" class="hover:text-green-400">
+                            <a :href="entry.url" class="hover:text-green-400">
                                 <h2 class="text-2xl font-semibold mb-1" x-text="entry.title"></h2>
                             </a>
                             <p class="text-base font-light text-gray-600 mb-4" x-text="entry.summary"></p>
