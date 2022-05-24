@@ -1,7 +1,7 @@
 version: 0.1
 name: science
 description: dataviz and data journalism
-max_age_minutes: 10080
+max_age_minutes: 10080 # 7 days
 categories:
   - name: 'dataviz'
     feeds:
