@@ -8,8 +8,8 @@ categories:
       - "what's new in publishing" : 'https://whatsnewinpublishing.com/feed/'
         'keep_only': "'charts' in text or 'dataviz' in text or 'data visual' in text OR 'data journalism' in text"
       - 'data journalism' : 'https://datajournalism.com/read/rss/longreads.xml'
-      - 'posts medium taggés dataviz (pas toujours très pertinent)' : 'https://medium.com/feed/tag/data-visualization'
-      - 'google news data artist' : 'googlenews-en-en: data artist'
+      #- 'posts medium taggés dataviz (pas toujours très pertinent)' : 'https://medium.com/feed/tag/data-visualization'
+      #- 'google news data artist' : 'googlenews-en-en: data artist'
       - 'nightingale' : 'https://medium.com/feed/nightingale'
       - 'flowing data' : 'https://flowingdata.com/feed'
       - 'blog data wrapper' : 'https://blog.datawrapper.de/feed/'
