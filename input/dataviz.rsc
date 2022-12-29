@@ -14,3 +14,4 @@ categories:
       - 'flowing data' : 'https://flowingdata.com/feed'
       - 'blog data wrapper' : 'https://blog.datawrapper.de/feed/'
       - 'podcast alberto cairo' : 'https://anchor.fm/s/47aac444/podcast/rss'
+      - 'visual capitalist' : 'https://feeds.feedburner.com/visualcapitalist'
