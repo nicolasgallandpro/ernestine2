@@ -1,5 +1,5 @@
 
 
-# ceci est un test
+# Outil d'aggrégation de contenus
 
-coucou
+Flux RSS, podcasts, youtube, google news.
